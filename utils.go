@@ -1,16 +1,51 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"first_webapp/data"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
+// Configuration type
+type Configuration struct {
+	Address      string
+	ReadTimeout  int64
+	WriteTimeout int64
+	Static       string
+}
+
+var config Configuration
 var logger *log.Logger
+
+// Convenience function for printing to stdout
+func p(a ...interface{}) {
+	fmt.Println(a)
+}
+
+func init() {
+	loadConfig()
+}
+
+func loadConfig() {
+	file, err := os.Open("config.json")
+	if err != nil {
+		log.Fatalln("cannot open config file", err)
+	}
+
+	decoder := json.NewDecoder(file)
+	config = Configuration{}
+	err = decoder.Decode(&config)
+
+	if err != nil {
+		log.Fatalln("cannot get configuration from file", err)
+	}
+}
 
 // Checks if the user is logged in and has a session, if not err is not nil
 func session(writer http.ResponseWriter, request *http.Request) (sess data.Session, err error) {
@@ -42,4 +77,9 @@ func danger(args ...interface{}) {
 func errorMessage(writer http.ResponseWriter, request *http.Request, msg string) {
 	url := []string{"/err?msg=", msg}
 	http.Redirect(writer, request, strings.Join(url, ""), 302)
+}
+
+// version
+func version() string {
+	return "0.1"
 }
