@@ -69,6 +69,13 @@ func (s *Session) Check() (valid bool, err error) {
 	return
 }
 
+// User get the user from the session
+func (s *Session) User() (user User, err error) {
+	user = User{}
+	err = Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id = $1", s.UserID).Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt)
+	return
+}
+
 // UserByEmail Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
 	user = User{}
