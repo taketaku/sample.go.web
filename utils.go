@@ -25,7 +25,7 @@ var logger *log.Logger
 
 // Convenience function for printing to stdout
 func p(a ...interface{}) {
-	fmt.Println(a)
+	fmt.Println(a...)
 }
 
 func init() {
