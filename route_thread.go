@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"first_webapp/data"
+	"net/http"
+)
 
 // GET /threads/new
 // Show the new thread form page
@@ -35,5 +38,23 @@ func createThread(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, "/", 302)
+	}
+}
+
+// GET /thread/read
+// Show the details of the thread, including the posts and the form to write a post
+func readThread(w http.ResponseWriter, r *http.Request) {
+	vals := r.URL.Query()
+	uuid := vals.Get("id")
+	thread, err := data.ThreadByUUID(uuid)
+	if err != nil {
+		errorMessage(w, r, "Cannot read thread")
+	} else {
+		_, err := session(w, r)
+		if err != nil {
+			generateHTML(w, &thread, "layout", "public.navbar", "public.thread")
+		} else {
+			generateHTML(w, &thread, "layout", "private.navbar", "private.thread")
+		}
 	}
 }

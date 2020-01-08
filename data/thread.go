@@ -62,6 +62,23 @@ func (t *Thread) NumReplies() (count int) {
 	return
 }
 
+// Posts get posts to a thread
+func (t *Thread) Posts() (posts []Post, err error) {
+	rows, err := Db.Query("SELECT id, uuid, body, user_id, thread_id, created_at FROM posts where thread_id = $1", t.ID)
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		post := Post{}
+		if err = rows.Scan(&post.ID, &post.UUID, &post.Body, &post.UserID, &post.ThreadID, &post.CreatedAt); err != nil {
+			return
+		}
+		posts = append(posts, post)
+	}
+	rows.Close()
+	return
+}
+
 // CreateThread create a new thread
 func (u *User) CreateThread(topic string) (conv Thread, err error) {
 	statement := "insert into threads (uuid, topic, user_id, created_at) values ($1, $2, $3, $4) returning id, uuid, topic, user_id, created_at"
@@ -74,9 +91,18 @@ func (u *User) CreateThread(topic string) (conv Thread, err error) {
 	return
 }
 
+// ThreadByUUID Get a thread by the UUID
+func ThreadByUUID(uuid string) (conv Thread, err error) {
+	conv = Thread{}
+	err = Db.QueryRow("SELECT id, uuid, topic, user_id, created_at FROM threads WHERE uuid = $1", uuid).
+		Scan(&conv.ID, &conv.UUID, &conv.Topic, &conv.UserID, &conv.CreatedAt)
+	return
+}
+
 // User get the user who started this thread
 func (t *Thread) User() (user User) {
 	user = User{}
-	Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id = $1", t.UserID).Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt)
+	Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id = $1", t.UserID).
+		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt)
 	return
 }

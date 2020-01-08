@@ -30,6 +30,7 @@ func main() {
 	// defined in route_thread.go
 	mux.HandleFunc("/thread/new", newThread)
 	mux.HandleFunc("/thread/create", createThread)
+	mux.HandleFunc("/thread/read", readThread)
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:8080",
