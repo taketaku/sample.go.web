@@ -21,6 +21,19 @@ type Session struct {
 	CreatedAt time.Time
 }
 
+// Create a new user, save user info into the database
+func (user *User) Create() (err error) {
+	statement := "insert into users (uuid, name, email, password, created_at) values ($1, $2, $3, $4, $5) retuning id, uuid, created_at"
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(createUUID(), user.Name, user.Email, Encrypt(user.Password), time.Now()).Scan(&user.ID, &user.UUID, &user.CreatedAt)
+	return
+}
+
 // Users Get all users in the database and returns it
 func Users() (users []User, err error) {
 	rows, err := Db.Query("SELECT id, uuid, name, email, password, created_at FROM users")
