@@ -21,6 +21,10 @@ func main() {
 	// index
 	mux.HandleFunc("/", index)
 
+	// defined in route_auth.go
+	mux.HandleFunc("/login", login)
+	mux.HandleFunc("/authenticate", authenticate)
+
 	server := &http.Server{
 		Addr:    "0.0.0.0:8080",
 		Handler: mux,
