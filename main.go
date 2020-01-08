@@ -27,6 +27,9 @@ func main() {
 	mux.HandleFunc("/signup_account", signupAccount)
 	mux.HandleFunc("/authenticate", authenticate)
 
+	// defined in route_thread.go
+	mux.HandleFunc("/thread/new", newThread)
+
 	server := &http.Server{
 		Addr:    "0.0.0.0:8080",
 		Handler: mux,
