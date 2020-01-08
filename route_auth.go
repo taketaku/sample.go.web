@@ -32,7 +32,7 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := user.Create(); err != nil {
-		danger(err, "cannot create user")
+		danger(err, "Cannot create user")
 	}
 	http.Redirect(w, r, "/login", 302)
 }

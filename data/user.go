@@ -23,13 +23,17 @@ type Session struct {
 
 // Create a new user, save user info into the database
 func (user *User) Create() (err error) {
-	statement := "insert into users (uuid, name, email, password, created_at) values ($1, $2, $3, $4, $5) retuning id, uuid, created_at"
+	// Postgres does not automatically return the last insert id, because it would be wrong to assume
+	// you're always using a sequence.You need to use the RETURNING keyword in your insert to get this
+	// information from postgres.
+	statement := "insert into users (uuid, name, email, password, created_at) values ($1, $2, $3, $4, $5) returning id, uuid, created_at"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
+	// use QueryRow to return a row and scan the returned id into the User struct
 	err = stmt.QueryRow(createUUID(), user.Name, user.Email, Encrypt(user.Password), time.Now()).Scan(&user.ID, &user.UUID, &user.CreatedAt)
 	return
 }
