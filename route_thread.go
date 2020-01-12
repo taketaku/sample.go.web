@@ -1,7 +1,7 @@
 package main
 
 import (
-	"first_webapp/data"
+	"sample.go.web/data"
 	"fmt"
 	"net/http"
 )

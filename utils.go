@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"first_webapp/data"
+	"sample.go.web/data"
 	"fmt"
 	"html/template"
 	"log"

@@ -16,7 +16,7 @@ var Db *sql.DB
 
 func init() {
 	var err error
-	Db, err = sql.Open("postgres", "dbname=first_webapp sslmode=disable")
+	Db, err = sql.Open("postgres", "dbname=sample.go.web sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
