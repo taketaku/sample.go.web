@@ -26,6 +26,24 @@ func (t *Thread) CreatedAtDate() string {
 	return t.CreatedAt.Format("Jan 2, 2006 at 3:04pm")
 }
 
+// CreatedAtDate format the CreatedAt date to display nicely on the screen
+func (post *Post) CreatedAtDate() string {
+	return post.CreatedAt.Format("Jan 2, 2006 at 3:04pm")
+}
+
+// CreatePost Create a new post to a thread
+func (user *User) CreatePost(conv Thread, body string) (post Post, err error) {
+	statement := "insert into posts (uuid, body, user_id, thread_id, created_at) values ($1, $2, $3, $4, $5) returning id, uuid, body, user_id, thread_id, created_at"
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	// use QueryRow to return a row and scan the returned id into the Session struct
+	err = stmt.QueryRow(createUUID(), body, user.ID, conv.ID, time.Now()).Scan(&post.ID, &post.UUID, &post.Body, &post.UserID, &post.ThreadID, &post.CreatedAt)
+	return
+}
+
 // Threads Get all threads in the database and returns it
 func Threads() (threads []Thread, err error) {
 	rows, err := Db.Query("SELECT id, uuid, topic, user_id, created_at FROM threads ORDER BY created_at DESC")
@@ -80,14 +98,14 @@ func (t *Thread) Posts() (posts []Post, err error) {
 }
 
 // CreateThread create a new thread
-func (u *User) CreateThread(topic string) (conv Thread, err error) {
+func (user *User) CreateThread(topic string) (conv Thread, err error) {
 	statement := "insert into threads (uuid, topic, user_id, created_at) values ($1, $2, $3, $4) returning id, uuid, topic, user_id, created_at"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(createUUID(), topic, u.ID, time.Now()).Scan(&conv.ID, &conv.UUID, &conv.Topic, &conv.UserID, &conv.CreatedAt)
+	err = stmt.QueryRow(createUUID(), topic, user.ID, time.Now()).Scan(&conv.ID, &conv.UUID, &conv.Topic, &conv.UserID, &conv.CreatedAt)
 	return
 }
 
@@ -103,6 +121,14 @@ func ThreadByUUID(uuid string) (conv Thread, err error) {
 func (t *Thread) User() (user User) {
 	user = User{}
 	Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id = $1", t.UserID).
+		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt)
+	return
+}
+
+// User Get the user who wrote the post
+func (post *Post) User() (user User) {
+	user = User{}
+	Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id = $1", post.UserID).
 		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt)
 	return
 }
